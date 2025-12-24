@@ -236,8 +236,9 @@ function attemptLogin(email, password) {
     const user = users.find(u => u.email === email && u.password === password);
 
     if (user) {
-        // Store current user session
-        localStorage.setItem('currentUser', JSON.stringify(user));
+        // Store current user session with timestamp
+        const sessionUser = { ...user, lastLogin: new Date().toLocaleString() };
+        localStorage.setItem('currentUser', JSON.stringify(sessionUser));
         return { success: true };
     }
 
@@ -296,11 +297,41 @@ function initPasswordToggle() {
 }
 
 // ==========================================
+// WELCOME PAGE
+// ==========================================
+function initWelcomePage() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (!logoutBtn) return; // Not on welcome page
+
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+    // Redirect if not logged in
+    if (!currentUser) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // Display user info
+    const usernameElem = document.getElementById('username');
+    const loginTimeElem = document.getElementById('loginTime');
+
+    if (usernameElem) usernameElem.textContent = `Welcome ${currentUser.name}!`;
+    if (loginTimeElem) loginTimeElem.textContent = currentUser.lastLogin || 'Just now';
+
+    // Logout functionality
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('currentUser');
+        window.location.href = 'index.html';
+    });
+}
+
+// ==========================================
 // INITIALIZE ON DOM READY
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     initLoginForm();
     initSignupForm();
+    initWelcomePage();
     initThemeToggle();
     initPasswordToggle();
 });
