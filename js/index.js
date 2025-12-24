@@ -1,137 +1,4 @@
 // ==========================================
-// INITIALIZATION - Run when DOM is ready
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    clearLoginFormOnLoad();
-    initThemeToggle();
-    initPasswordToggles();
-    initLoginForm();
-    initSignupForm();
-    initWelcomePage();
-});
-
-// ==========================================
-// THEME TOGGLE (Dark/Light Mode)
-// ==========================================
-function initThemeToggle() {
-    const themeToggle = document.getElementById('themeToggle');
-    if (!themeToggle) return;
-
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-
-    themeToggle.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-
-        themeToggle.setAttribute(
-            'aria-label',
-            newTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
-        );
-    });
-}
-
-// ==========================================
-// PASSWORD VISIBILITY TOGGLE
-// ==========================================
-function initPasswordToggles() {
-    const toggleButtons = document.querySelectorAll('.password-toggle');
-
-    toggleButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const targetId = button.getAttribute('data-target');
-            const input = document.getElementById(targetId);
-            if (!input) return;
-
-            const isPassword = input.type === 'password';
-            input.type = isPassword ? 'text' : 'password';
-
-            const eyeIcon = button.querySelector('.eye-icon');
-            const eyeOffIcon = button.querySelector('.eye-off-icon');
-
-            if (eyeIcon && eyeOffIcon) {
-                eyeIcon.style.display = isPassword ? 'none' : 'block';
-                eyeOffIcon.style.display = isPassword ? 'block' : 'none';
-            }
-
-            button.setAttribute(
-                'aria-label',
-                isPassword ? 'Hide password' : 'Show password'
-            );
-        });
-    });
-}
-
-// ==========================================
-// TOAST NOTIFICATION SYSTEM
-// ==========================================
-function showToast(type, title, message, duration = 4000) {
-    const container = document.getElementById('toastContainer');
-    if (!container) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-
-    const icons = {
-        success: `✔️`,
-        error: `❌`,
-        warning: `⚠️`
-    };
-
-    toast.innerHTML = `
-        <span class="toast-icon">${icons[type]}</span>
-        <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            <div class="toast-message">${message}</div>
-        </div>
-        <button class="toast-close">✖</button>
-    `;
-
-    container.appendChild(toast);
-
-    toast.querySelector('.toast-close')
-        .addEventListener('click', () => removeToast(toast));
-
-    setTimeout(() => removeToast(toast), duration);
-}
-
-function removeToast(toast) {
-    toast.classList.add('hiding');
-    setTimeout(() => toast.remove(), 300);
-}
-
-// ==========================================
-// VALIDATION HELPERS
-// ==========================================
-function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function isValidUsername(name) {
-    return /^[A-Za-z]{3,10}(\s?[A-Za-z]{3,10})?$/.test(name);
-}
-
-function isValidPassword(password) {
-    return password.length >= 5 && password.length <= 15;
-}
-
-function setFieldValidation(input, errorId, isValid) {
-    const errorEl = document.getElementById(errorId);
-
-    input.classList.remove('is-valid', 'is-invalid');
-    if (input.value) {
-        input.classList.add(isValid ? 'is-valid' : 'is-invalid');
-    }
-
-    if (errorEl) {
-        errorEl.classList.toggle('show', !isValid && input.value.length > 0);
-    }
-}
-
-// ==========================================
 // LOGIN FORM
 // ==========================================
 function initLoginForm() {
@@ -142,14 +9,22 @@ function initLoginForm() {
 
     if (!form) return;
 
+    // Real-time validation
     emailInput.addEventListener('input', () => {
+        setFieldValidation(emailInput, 'emailError', isValidEmail(emailInput.value));
+    });
+    emailInput.addEventListener('blur', () => {
         setFieldValidation(emailInput, 'emailError', isValidEmail(emailInput.value));
     });
 
     passwordInput.addEventListener('input', () => {
         setFieldValidation(passwordInput, 'passwordError', passwordInput.value.length > 0);
     });
+    passwordInput.addEventListener('blur', () => {
+        setFieldValidation(passwordInput, 'passwordError', passwordInput.value.length > 0);
+    });
 
+    // Form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -180,33 +55,6 @@ function initLoginForm() {
         }
     });
 }
-function clearLoginFormOnLoad() {
-    const form = document.getElementById('loginForm');
-    if (!form) return;
-
-    form.reset();
-
-
-    const inputs = form.querySelectorAll('input');
-    inputs.forEach(input => {
-        input.value = '';
-        input.classList.remove('is-valid', 'is-invalid');
-    });
-}
-
-function attemptLogin(email, password) {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-
-    for (const user of users) {
-        if (user.email === email && user.password === password) {
-            localStorage.setItem('sessionUsername', user.name);
-            localStorage.setItem('loginTime', new Date().toLocaleString());
-            return { success: true };
-        }
-    }
-
-    return { success: false, message: 'Wrong email or password' };
-}
 
 // ==========================================
 // SIGNUP FORM
@@ -220,85 +68,239 @@ function initSignupForm() {
     const password = document.getElementById('userPasswordInput');
     const btn = document.getElementById('signupBtn');
 
+    // Real-time validation
+    name.addEventListener('input', () => {
+        setFieldValidation(name, 'usernameError', isValidUsername(name.value));
+    });
+    name.addEventListener('blur', () => {
+        setFieldValidation(name, 'usernameError', isValidUsername(name.value));
+    });
+
+    email.addEventListener('input', () => {
+        setFieldValidation(email, 'emailError', isValidEmail(email.value));
+    });
+    email.addEventListener('blur', () => {
+        setFieldValidation(email, 'emailError', isValidEmail(email.value));
+    });
+
+    password.addEventListener('input', () => {
+        setFieldValidation(password, 'passwordError', isValidPassword(password.value));
+    });
+    password.addEventListener('blur', () => {
+        setFieldValidation(password, 'passwordError', isValidPassword(password.value));
+    });
+
+    // Form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        if (!isValidUsername(name.value) ||
-            !isValidEmail(email.value) ||
-            !isValidPassword(password.value)) {
+        const usernameValid = isValidUsername(name.value);
+        const emailValid = isValidEmail(email.value);
+        const passwordValid = isValidPassword(password.value);
 
-            showToast('error', 'Error', 'Invalid signup data');
+        setFieldValidation(name, 'usernameError', usernameValid);
+        setFieldValidation(email, 'emailError', emailValid);
+        setFieldValidation(password, 'passwordError', passwordValid);
+
+        if (!usernameValid || !emailValid || !passwordValid) {
+            showToast('error', 'Error', 'Please correct the errors in the form.');
             return;
         }
 
         const users = JSON.parse(localStorage.getItem('users')) || [];
         if (users.some(u => u.email === email.value)) {
             showToast('error', 'Error', 'Email already exists');
+            setFieldValidation(email, 'emailError', false);
             return;
         }
 
         setLoadingState(btn, true);
         await delay(800);
 
-        users.push({
-            name: name.value,
-            email: email.value,
-            password: password.value
-        });
-
+        users.push({ name: name.value, email: email.value, password: password.value });
         localStorage.setItem('users', JSON.stringify(users));
-        setLoadingState(btn, false);
 
+        setLoadingState(btn, false);
         showToast('success', 'Done', 'Account created');
         setTimeout(() => window.location.href = 'index.html', 1200);
     });
 }
 
 // ==========================================
-// WELCOME PAGE
+// VALIDATION HELPER FUNCTIONS
 // ==========================================
-function initWelcomePage() {
-    const usernameEl = document.getElementById('username');
-    const loginTimeEl = document.getElementById('loginTime');
-    const logoutBtn = document.getElementById('logoutBtn');
 
-    if (usernameEl) {
-        const name = localStorage.getItem('sessionUsername');
-        if (!name) {
-            window.location.href = 'index.html';
-            return;
-        }
-        usernameEl.textContent = `Welcome, ${name}!`;
-    }
+/**
+ * Validate email format using regex
+ */
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email.trim());
+}
 
-    if (loginTimeEl) {
-        loginTimeEl.textContent =
-            localStorage.getItem('loginTime') || '';
-    }
+/**
+ * Validate password (minimum 6 characters)
+ */
+function isValidPassword(password) {
+    return password.length >= 6;
+}
 
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('sessionUsername');
-            localStorage.removeItem('loginTime');
+/**
+ * Validate username (minimum 3 characters, alphanumeric)
+ */
+function isValidUsername(username) {
+    return username.trim().length >= 3;
+}
 
-            showToast('success', 'Logged out', 'Goodbye 👋');
+/**
+ * Set field validation state (valid/invalid)
+ */
+function setFieldValidation(inputElement, errorId, isValid) {
+    const errorElement = document.getElementById(errorId);
 
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 800);
-        });
+    if (isValid) {
+        inputElement.classList.remove('invalid');
+        inputElement.classList.add('valid');
+        if (errorElement) errorElement.style.display = 'none';
+    } else {
+        inputElement.classList.remove('valid');
+        inputElement.classList.add('invalid');
+        if (errorElement) errorElement.style.display = 'block';
     }
 }
 
 // ==========================================
-// UTILITIES
+// UTILITY FUNCTIONS
 // ==========================================
+
+/**
+ * Show toast notification
+ */
+function showToast(type, title, message) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    const icons = {
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
+    };
+
+    toast.innerHTML = `
+        <span class="toast-icon">${icons[type] || 'ℹ'}</span>
+        <div class="toast-content">
+            <strong class="toast-title">${title}</strong>
+            <p class="toast-message">${message}</p>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+        toast.classList.add('toast-fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+/**
+ * Set loading state on button
+ */
 function setLoadingState(button, isLoading) {
-    if (!button) return;
-    button.disabled = isLoading;
-    button.classList.toggle('loading', isLoading);
+    if (isLoading) {
+        button.classList.add('loading');
+        button.disabled = true;
+    } else {
+        button.classList.remove('loading');
+        button.disabled = false;
+    }
 }
 
+/**
+ * Promise-based delay
+ */
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+/**
+ * Attempt login with stored users
+ */
+function attemptLogin(email, password) {
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const user = users.find(u => u.email === email && u.password === password);
+
+    if (user) {
+        // Store current user session
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        return { success: true };
+    }
+
+    return { success: false, message: 'Invalid email or password' };
+}
+
+// ==========================================
+// THEME TOGGLE
+// ==========================================
+function initThemeToggle() {
+    const toggle = document.getElementById('themeToggle');
+    if (!toggle) return;
+
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    toggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+}
+
+// ==========================================
+// PASSWORD TOGGLE
+// ==========================================
+function initPasswordToggle() {
+    const toggleButtons = document.querySelectorAll('.password-toggle');
+
+    toggleButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+
+            if (!input) return;
+
+            const eyeIcon = btn.querySelector('.eye-icon');
+            const eyeOffIcon = btn.querySelector('.eye-off-icon');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.setAttribute('aria-label', 'Hide password');
+                if (eyeIcon) eyeIcon.style.display = 'none';
+                if (eyeOffIcon) eyeOffIcon.style.display = 'block';
+            } else {
+                input.type = 'password';
+                btn.setAttribute('aria-label', 'Show password');
+                if (eyeIcon) eyeIcon.style.display = 'block';
+                if (eyeOffIcon) eyeOffIcon.style.display = 'none';
+            }
+        });
+    });
+}
+
+// ==========================================
+// INITIALIZE ON DOM READY
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    initLoginForm();
+    initSignupForm();
+    initThemeToggle();
+    initPasswordToggle();
+});
