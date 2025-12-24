@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Welcome to your dashboard - Smart Login System">
+    <title>Dashboard | Smart Login System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer" role="alert" aria-live="polite"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <a class="navbar-brand" href="#">🔐 Smart Login</a>
+
+            <div class="navbar-actions">
+                <!-- Theme Toggle (Inline for navbar) -->
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme"
+                    style="position: static; padding: 0.5rem;">
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" style="width: 20px; height: 20px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" style="width: 20px; height: 20px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
+
+                <!-- Logout Button -->
+                <button class="btn-logout" id="logoutBtn">
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Welcome Content -->
+    <main class="welcome-container">
+        <div class="welcome-card">
+            <!-- User Avatar -->
+            <div class="welcome-avatar" aria-hidden="false" role="img" aria-label="User avatar">
+                <img id="avatarImg" alt="User avatar" src="" style="display:none;" />
+                <span class="avatar-initials">👋</span>
+            </div>
+
+            <!-- Welcome Message -->
+            <h1 id="username">Welcome!</h1>
+            <p>You've successfully signed in to your account.</p>
+
+            <!-- Quick Info -->
+            <div class="quick-info" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                <p style="font-size: 0.9rem; color: var(--text-muted);">
+                    Last login: <span id="loginTime"></span>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="./js/index.js"></script>
+</body>
+
+</html>
